@@ -1,0 +1,368 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐄 草地牛 — 你的牧场小伙伴</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #90EE90 40%, #228B22 100%);
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  .scene {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    cursor: pointer;
+  }
+  .sky { position: absolute; inset: 0; z-index: 0; }
+  .sun {
+    position: absolute; top: 40px; right: 80px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, #FFD700, #FFA500);
+    border-radius: 50%;
+    box-shadow: 0 0 60px #FFD70088;
+    animation: sunGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes sunGlow {
+    0% { box-shadow: 0 0 40px #FFD70066; transform: scale(1); }
+    100% { box-shadow: 0 0 80px #FFD700aa; transform: scale(1.05); }
+  }
+  .cloud {
+    position: absolute; background: #fff; border-radius: 50%; opacity: 0.8;
+    animation: cloudDrift linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: ''; position: absolute; background: #fff; border-radius: 50%;
+  }
+  .cloud1 { width: 100px; height: 36px; top: 60px; left: -120px; animation-duration: 25s; }
+  .cloud1::before { width: 50px; height: 50px; top: -24px; left: 20px; }
+  .cloud1::after  { width: 64px; height: 44px; top: -16px; left: 44px; }
+  .cloud2 { width: 80px; height: 28px; top: 110px; left: -100px; animation-duration: 35s; animation-delay: 6s; }
+  .cloud2::before { width: 40px; height: 40px; top: -20px; left: 16px; }
+  .cloud2::after  { width: 48px; height: 36px; top: -14px; left: 36px; }
+  .cloud3 { width: 120px; height: 40px; top: 30px; left: -140px; animation-duration: 30s; animation-delay: 12s; }
+  .cloud3::before { width: 56px; height: 56px; top: -28px; left: 24px; }
+  .cloud3::after  { width: 72px; height: 48px; top: -18px; left: 52px; }
+  @keyframes cloudDrift {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(1000px); }
+  }
+  .ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 55%; z-index: 0;
+    background: linear-gradient(180deg, #7CCD7C 0%, #3CB371 40%, #2E8B57 100%);
+  }
+  .grass-blade {
+    position: absolute; bottom: 0; width: 4px;
+    background: linear-gradient(to top, #228B22, #7CFC00);
+    border-radius: 2px 2px 0 0; transform-origin: bottom center;
+    animation: grassSway 2s ease-in-out infinite alternate;
+  }
+  @keyframes grassSway {
+    0% { transform: rotate(-3deg); }
+    100% { transform: rotate(3deg); }
+  }
+  .flower {
+    position: absolute; z-index: 1;
+    animation: flowerSway 3s ease-in-out infinite alternate;
+  }
+  .flower-stem { width: 3px; height: 30px; background: #228B22; margin: 0 auto; border-radius: 2px; }
+  .flower-head {
+    width: 18px; height: 18px; border-radius: 50%; margin: 0 auto -2px; position: relative;
+    box-shadow:
+      8px 8px 0 -3px var(--fc), -8px 8px 0 -3px var(--fc),
+      0 12px 0 -3px var(--fc), 8px 0 0 -3px var(--fc),
+      -8px 0 0 -3px var(--fc), 0 -8px 0 -3px var(--fc);
+  }
+  .flower-center { width: 10px; height: 10px; background: #FFD700; border-radius: 50%; margin: 4px auto; }
+  .flower1 { --fc: #FF6B9D; bottom: 110px; left: 60px; }
+  .flower2 { --fc: #FFB347; bottom: 130px; left: 160px; }
+  .flower3 { --fc: #FF6B9D; bottom: 90px;  left: 350px; }
+  .flower4 { --fc: #87CEEB; bottom: 140px; left: 530px; }
+  .flower5 { --fc: #FFB347; bottom: 100px; left: 670px; }
+  .flower6 { --fc: #DDA0DD; bottom: 120px; left: 440px; }
+  @keyframes flowerSway {
+    0% { transform: rotate(-2deg); }
+    100% { transform: rotate(2deg); }
+  }
+  .cow {
+    position: absolute; bottom: 220px; left: 330px; z-index: 2;
+    transition: transform 0.3s ease; cursor: pointer;
+  }
+  .cow:hover { transform: scale(1.05); }
+  .cow.clicked { animation: cowJump 0.6s ease; }
+  @keyframes cowJump {
+    0%, 100% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-60px) scale(1.08); }
+    60% { transform: translateY(-20px) scale(0.95); }
+  }
+  .cow-body {
+    width: 120px; height: 72px; background: #F5F5DC;
+    border-radius: 50% 50% 48% 48%; position: relative;
+    border: 2px solid #8B7355; overflow: hidden;
+  }
+  .patch { position: absolute; background: #2F1B0E; border-radius: 50%; }
+  .patch1 { width: 22px; height: 28px; top: 8px; left: 12px; }
+  .patch2 { width: 30px; height: 24px; top: 28px; left: 36px; }
+  .patch3 { width: 16px; height: 20px; top: 14px; left: 72px; }
+  .patch4 { width: 26px; height: 18px; top: 40px; left: 76px; }
+  .patch5 { width: 20px; height: 15px; top: 10px; left: 50px; }
+  .cow-head {
+    width: 62px; height: 58px; background: #F5F5DC;
+    border-radius: 50%; position: absolute; top: -30px; left: 42px;
+    border: 2px solid #8B7355; z-index: 1;
+  }
+  .cow-head .patch { width: 14px; height: 10px; top: 16px; left: 40px; }
+  .ear {
+    width: 20px; height: 16px; background: #F5F5DC;
+    border-radius: 50%; position: absolute; top: -14px;
+    border: 2px solid #8B7355; z-index: 0;
+  }
+  .ear-left  { left: 36px; transform: rotate(-20deg); }
+  .ear-right { left: 88px; transform: rotate(20deg); }
+  .ear-inner { width: 10px; height: 8px; background: #FFB6C1; border-radius: 50%; position: absolute; top: 2px; left: 3px; }
+  .eye {
+    width: 12px; height: 14px; background: #2F1B0E;
+    border-radius: 50%; position: absolute; top: 8px; z-index: 2;
+    transition: all 0.15s;
+  }
+  .eye-left  { left: 16px; }
+  .eye-right { left: 38px; }
+  .eye-shine { width: 4px; height: 5px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; }
+  .cow.blink .eye { height: 3px; }
+  .nostril { width: 5px; height: 4px; background: #8B7355; border-radius: 50%; position: absolute; top: 34px; z-index: 2; }
+  .nostril-left  { left: 22px; }
+  .nostril-right { left: 36px; }
+  .horn {
+    width: 0; height: 0;
+    border-left: 8px solid transparent; border-right: 8px solid transparent;
+    border-bottom: 24px solid #D2B48C; position: absolute; top: -22px;
+    z-index: -1; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+  }
+  .horn-left  { left: 36px; transform: rotate(-18deg); }
+  .horn-right { left: 68px; transform: rotate(18deg); }
+  .mouth {
+    width: 16px; height: 8px; border-bottom: 3px solid #8B7355;
+    border-radius: 0 0 50% 50%; position: absolute; top: 38px; left: 24px; z-index: 2;
+  }
+  .leg {
+    width: 18px; height: 44px; background: #F5F5DC;
+    border-radius: 0 0 6px 6px; position: absolute; bottom: -40px;
+    border: 2px solid #8B7355; border-top: none;
+  }
+  .leg-left-front  { left: 14px; }
+  .leg-right-front { left: 44px; }
+  .leg-left-back   { left: 72px; }
+  .leg-right-back  { left: 96px; }
+  .hoof {
+    width: 20px; height: 10px; background: #2F1B0E;
+    border-radius: 4px; position: absolute; bottom: -4px; left: -3px;
+  }
+  .tail {
+    position: absolute; bottom: 20px; left: -8px; z-index: -1;
+    animation: tailWag 1.2s ease-in-out infinite alternate;
+  }
+  .tail-line {
+    width: 6px; height: 28px; background: #F5F5DC;
+    border-radius: 0 0 4px 4px; border: 1px solid #8B7355;
+    transform: rotate(30deg); transform-origin: top center;
+  }
+  .tail-tuft { width: 10px; height: 10px; background: #2F1B0E; border-radius: 50%; position: absolute; bottom: -2px; left: -4px; }
+  @keyframes tailWag {
+    0%   { transform: rotate(-10deg); }
+    100% { transform: rotate(10deg); }
+  }
+  .fence { position: absolute; bottom: 180px; z-index: 0; }
+  .fence-post { width: 6px; height: 34px; background: #8B6914; border-radius: 2px; position: absolute; bottom: 0; }
+  .fence-rail { position: absolute; bottom: 10px; height: 4px; background: #A0762A; border-radius: 2px; }
+  .fence-left  { left: 20px; right: 60%; }
+  .fence-right { left: 70%; right: 20px; }
+  .fence .fence-post:nth-child(1)  { left: 20px; }
+  .fence .fence-post:nth-child(2)  { left: 80px; }
+  .fence .fence-post:nth-child(3)  { left: 140px; }
+  .fence .fence-post:nth-child(4)  { left: 560px; }
+  .fence .fence-post:nth-child(5)  { left: 620px; }
+  .fence .fence-post:nth-child(6)  { left: 680px; }
+  .speech-bubble {
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    background: #fff; padding: 6px 14px; border-radius: 16px;
+    font-size: 20px; white-space: nowrap; box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 5;
+  }
+  .speech-bubble.show { opacity: 1; }
+  .speech-bubble::after {
+    content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #fff;
+  }
+  .hint {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.7); font-size: 14px; letter-spacing: 1px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3); z-index: 10;
+    background: rgba(0,0,0,0.2); padding: 6px 18px; border-radius: 20px; backdrop-filter: blur(4px);
+  }
+  .butterfly { position: absolute; z-index: 1; font-size: 20px; animation: butterflyFly 8s ease-in-out infinite alternate; }
+  .bf1 { top: 140px; left: 100px; animation-duration: 7s; }
+  .bf2 { top: 200px; left: 600px; animation-duration: 9s; animation-delay: 3s; }
+  @keyframes butterflyFly {
+    0%   { transform: translate(0,0) rotate(0deg); }
+    25%  { transform: translate(60px,-30px) rotate(5deg); }
+    50%  { transform: translate(120px,10px) rotate(-3deg); }
+    75%  { transform: translate(50px,-50px) rotate(4deg); }
+    100% { transform: translate(0,0) rotate(0deg); }
+  }
+  @media (max-width: 840px) {
+    .scene { width: 95vw; height: 80vw; border-radius: 16px; }
+    .cow { left: 35%; }
+    .cow-body { width: 100px; height: 60px; }
+    .cow-head { width: 52px; height: 48px; left: 36px; top: -24px; }
+    .leg { width: 14px; height: 34px; bottom: -32px; }
+    .leg-left-front  { left: 10px; }
+    .leg-right-front { left: 36px; }
+    .leg-left-back   { left: 60px; }
+    .leg-right-back  { left: 82px; }
+    .horn { border-bottom-width: 18px; border-left-width: 6px; border-right-width: 6px; top: -18px; }
+    .horn-left  { left: 30px; }
+    .horn-right { left: 56px; }
+    .tail { display: none; }
+    .flower { transform: scale(0.7); }
+    .flower1 { left: 30px; } .flower2 { left: 120px; } .flower3 { left: 260px; }
+    .flower4 { left: 400px; } .flower5 { left: 510px; } .flower6 { left: 330px; }
+    .sun { width: 50px; height: 50px; top: 20px; right: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="scene" id="scene">
+  <div class="sky">
+    <div class="sun"></div>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+  </div>
+  <div class="ground" id="ground"></div>
+  <div class="flower flower1"><div class="flower-head"><div class="flower-center"></div></div><div class="flower-stem"></div></div>
+  <div class="flower flower2"><div class="flower-head"><div class="flower-center"></div></div><div class="flower-stem"></div></div>
+  <div class="flower flower3"><div class="flower-head"><div class="flower-center"></div></div><div class="flower-stem"></div></div>
+  <div class="flower flower4"><div class="flower-head"><div class="flower-center"></div></div><div class="flower-stem"></div></div>
+  <div class="flower flower5"><div class="flower-head"><div class="flower-center"></div></div><div class="flower-stem"></div></div>
+  <div class="flower flower6"><div class="flower-head"><div class="flower-center"></div></div><div class="flower-stem"></div></div>
+  <div class="butterfly bf1">🦋</div>
+  <div class="butterfly bf2">🦋</div>
+  <div class="fence fence-left">
+    <div class="fence-post"></div><div class="fence-post"></div><div class="fence-post"></div>
+    <div class="fence-rail" style="bottom:22px;"></div>
+    <div class="fence-rail" style="bottom:10px;"></div>
+  </div>
+  <div class="fence fence-right">
+    <div class="fence-post"></div><div class="fence-post"></div><div class="fence-post"></div>
+    <div class="fence-rail" style="bottom:22px;"></div>
+    <div class="fence-rail" style="bottom:10px;"></div>
+  </div>
+  <div class="cow" id="cow">
+    <div class="horn horn-left"></div>
+    <div class="horn horn-right"></div>
+    <div class="ear ear-left"><div class="ear-inner"></div></div>
+    <div class="ear ear-right"><div class="ear-inner"></div></div>
+    <div class="cow-head">
+      <div class="eye eye-left"><div class="eye-shine"></div></div>
+      <div class="eye eye-right"><div class="eye-shine"></div></div>
+      <div class="nostril nostril-left"></div>
+      <div class="nostril nostril-right"></div>
+      <div class="mouth"></div>
+      <div class="patch" style="width:14px;height:10px;top:16px;left:40px;"></div>
+    </div>
+    <div class="cow-body">
+      <div class="patch patch1"></div>
+      <div class="patch patch2"></div>
+      <div class="patch patch3"></div>
+      <div class="patch patch4"></div>
+      <div class="patch patch5"></div>
+    </div>
+    <div class="tail">
+      <div class="tail-line"></div>
+      <div class="tail-tuft"></div>
+    </div>
+    <div class="leg leg-left-front"><div class="hoof"></div></div>
+    <div class="leg leg-right-front"><div class="hoof"></div></div>
+    <div class="leg leg-left-back"><div class="hoof"></div></div>
+    <div class="leg leg-right-back"><div class="hoof"></div></div>
+    <div class="speech-bubble" id="bubble"></div>
+  </div>
+  <div class="hint" id="hint">🐄 点击小牛 &nbsp;·&nbsp; 摸摸头 &nbsp;·&nbsp; 它很开心</div>
+</div>
+<script>
+  const cow = document.getElementById('cow');
+  const bubble = document.getElementById('bubble');
+  const hint = document.getElementById('hint');
+  const moods = [
+    { emoji: '😊', text: '哞~ 你好呀！' },
+    { emoji: '🌿', text: '草真好吃~' },
+    { emoji: '☀️', text: '今天天气真好' },
+    { emoji: '🌸', text: '蝴蝶飞过去了！' },
+    { emoji: '😌', text: '好舒服~' },
+    { emoji: '💛', text: '哞哞！' },
+    { emoji: '✨', text: '喜欢你摸我~' },
+    { emoji: '🌙', text: '有点困了… zzz' },
+    { emoji: '🍃', text: '风吹着好舒服' },
+    { emoji: '🎵', text: '哼着小曲儿~' },
+  ];
+  let moodIndex = -1;
+  let bubbleTimer = null;
+  let isSleeping = false;
+  const ground = document.getElementById('ground');
+  for (let i = 0; i < 60; i++) {
+    const blade = document.createElement('div');
+    blade.className = 'grass-blade';
+    blade.style.left = (Math.random() * 100) + '%';
+    blade.style.height = (12 + Math.random() * 28) + 'px';
+    blade.style.animationDelay = (Math.random() * 2) + 's';
+    blade.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    ground.appendChild(blade);
+  }
+  function showMood(keep) {
+    let idx;
+    do { idx = Math.floor(Math.random() * moods.length); } while (idx === moodIndex);
+    moodIndex = idx;
+    bubble.textContent = moods[idx].emoji + ' ' + moods[idx].text;
+    bubble.classList.add('show');
+    clearTimeout(bubbleTimer);
+    if (!keep) {
+      bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 2500);
+    }
+  }
+  setInterval(() => {
+    if (!isSleeping && !bubble.classList.contains('show')) {
+      showMood(false);
+    }
+  }, 8000);
+  setInterval(() => {
+    cow.classList.add('blink');
+    setTimeout(() => cow.classList.remove('blink'), 160);
+  }, 3000);
+  cow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    cow.classList.remove('clicked');
+    void cow.offsetWidth;
+    cow.classList.add('clicked');
+    showMood(true);
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 3000);
+  });
+  document.getElementById('scene').addEventListener('click', (e) => {
+    if (e.target === cow || cow.contains(e.target)) return;
+    showMood(false);
+  });
+  setTimeout(() => showMood(false), 600);
+</script>
+</body>
+</html>
