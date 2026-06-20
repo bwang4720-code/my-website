@@ -1,0 +1,49 @@
+﻿* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#gameCanvas {
+  display: block;
+  background: #FFF8DC;
+  cursor: pointer;
+}
+
+/* 响应式：小屏幕全屏 */
+@media (max-width: 420px) {
+  body {
+    align-items: flex-start;
+    padding-top: 0;
+  }
+  
+  #game-container {
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  #gameCanvas {
+    width: 100vw;
+    height: 100vh;
+  }
+}
